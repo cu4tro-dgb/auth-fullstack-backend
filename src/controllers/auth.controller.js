@@ -46,8 +46,10 @@ export async function login(req, res) {
 
     const token = await generateToken({ id: userFound.id })
 
-    res.cookie('token', token)
-    res.status(200).json({ token })
+    res
+      .status(200)
+      .cookie('token', token, { httpOnly: true, secure: false, maxAge: 1000 * 60 * 60 })
+      .json({ token })
   } catch (error) {
     console.error('Error during login:', error)
     res.status(500).json({ message: 'Internal server error' })
@@ -55,6 +57,5 @@ export async function login(req, res) {
 }
 
 export async function logout(req, res) {
-  res.cookie('token', '')
-  res.status(200).json({ message: 'Logged out successfully' })
+  res.clearCookie('token').json({ message: 'Logged out successfully' })
 }

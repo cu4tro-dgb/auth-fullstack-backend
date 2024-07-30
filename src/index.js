@@ -2,11 +2,11 @@ import express, { json, urlencoded } from 'express'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 
-import { PORT } from './config.js'
 import authRoutes from './routes/auth.routes.js'
 import userProfileRoutes from './routes/userprofile.routes.js'
 
 import { validateToken } from './middleware/validate-token.js'
+import { PORT } from './config.js'
 
 const app = express()
 
