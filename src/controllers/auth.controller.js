@@ -41,7 +41,7 @@ export async function login(req, res) {
     const userFound = await prisma.user.findFirst({ where: { email } })
     if (!userFound) return res.status(404).json({ message: 'User not found' })
 
-    const match = await comparePassword(password, userFound.password) // Asegúrate de que comparePassword sea compatible con promesas
+    const match = await comparePassword(password, userFound.password)
     if (!match) return res.status(400).json({ message: 'Email or password incorrect' })
 
     const token = await generateToken({ id: userFound.id })
