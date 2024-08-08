@@ -34,6 +34,7 @@ model Profile {
 model Role {
   id          String           @id @default(uuid())
   name        String           @unique
+  description String?
   users       UserRole[]
   permissions RolePermission[]
 }
@@ -41,6 +42,7 @@ model Role {
 model Permission {
   id    String           @id @default(uuid())
   name  String           @unique
+  description String?
   roles RolePermission[]
 }
 
@@ -50,6 +52,8 @@ model UserRole {
   userId String
   Role   Role   @relation(fields: [roleId], references: [id])
   roleId String
+
+  @@unique([userId, roleId])
 }
 
 model RolePermission {
@@ -58,4 +62,6 @@ model RolePermission {
   roleId       String
   permission   Permission @relation(fields: [permissionId], references: [id])
   permissionId String
+
+  @@unique([roleId, permissionId])
 }
