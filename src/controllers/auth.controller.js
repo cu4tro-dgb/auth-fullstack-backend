@@ -5,13 +5,14 @@ import { comparePassword, hashPassword } from '../utils/password.js'
 const prisma = new PrismaClient()
 
 export async function register(req, res) {
-  const { email, password, username, firstname, lastname } = req.body
+  const { email, password, username, firstname, lastname, roles } = req.body
   try {
     const userFound = await prisma.user.findFirst({ where: { email } })
-    if (userFound) return res.status(400).json({ message: 'The user is already registered' })
+    if (userFound)
+      return res.status(400).json({ message: 'The user is already registered' })
 
     const passwordHash = await hashPassword(password)
-
+    console.log(req.body)
     const newUser = await prisma.user.create({
       data: {
         email,
@@ -21,6 +22,20 @@ export async function register(req, res) {
           create: {
             firstname,
             lastname
+          }
+        },
+        userRole: {
+          // create: {
+          //   Role: {
+          //     connect: roles.map((roleName) => ({ name: roleName }))
+          //   }
+          // }
+          connect: {
+            Role: {
+              name: {
+                equals: 'admin'
+              }
+            }
           }
         }
       }
@@ -42,13 +57,18 @@ export async function login(req, res) {
     if (!userFound) return res.status(404).json({ message: 'User not found' })
 
     const match = await comparePassword(password, userFound.password)
-    if (!match) return res.status(400).json({ message: 'Email or password incorrect' })
+    if (!match)
+      return res.status(400).json({ message: 'Email or password incorrect' })
 
     const token = await generateToken({ id: userFound.id })
 
     res
       .status(200)
-      .cookie('token', token, { httpOnly: true, secure: false, maxAge: 1000 * 60 * 60 })
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 60
+      })
       .json({ token })
   } catch (error) {
     console.error('Error during login:', error)
