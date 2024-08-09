@@ -6,13 +6,21 @@ const prisma = new PrismaClient()
 
 export async function register(req, res) {
   const { email, password, username, firstname, lastname, roles } = req.body
+  // <- validar email = string, email
+  // <- validar password = string, min 8 max 20
+  // <- validar username = string, min 4
+  // <- validar firstname = string, optional
+  // <- validar lastname = string, optional
+  // <- validar roles = string[],  role database
   try {
     const userFound = await prisma.user.findFirst({ where: { email } })
     if (userFound)
       return res.status(400).json({ message: 'The user is already registered' })
 
     const passwordHash = await hashPassword(password)
-    console.log(req.body)
+
+    const defaultRole = roles & roles.length ? roles : ['user']
+
     const newUser = await prisma.user.create({
       data: {
         email,
@@ -25,18 +33,7 @@ export async function register(req, res) {
           }
         },
         userRole: {
-          // create: {
-          //   Role: {
-          //     connect: roles.map((roleName) => ({ name: roleName }))
-          //   }
-          // }
-          connect: {
-            Role: {
-              name: {
-                equals: 'admin'
-              }
-            }
-          }
+          create: defaultRole.map((role) => ({ Role: { connect: { name: role } } })),
         }
       }
     })
