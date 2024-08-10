@@ -1,11 +1,9 @@
 export function validateSchema(schema) {
   return async (req, res, next) => {
-    try {
-      schema.parse(req.body)
-      next()
-    } catch (error) {
-      console.error(error)
-      res.status(400).json({ errors: error.errors })
+    const result = await schema.safeParseAsync(req.body)
+    if (!result.success) {
+      return res.status(400).json({ errors: result.error.errors })
     }
+    next()
   }
 }

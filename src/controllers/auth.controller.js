@@ -6,12 +6,6 @@ const prisma = new PrismaClient()
 
 export async function register(req, res) {
   const { email, password, username, firstname, lastname, roles } = req.body
-  // <- validar email = string, email
-  // <- validar password = string, min 8 max 20
-  // <- validar username = string, min 4
-  // <- validar firstname = string, optional
-  // <- validar lastname = string, optional
-  // <- validar roles = string[],  role database
   try {
     const userFound = await prisma.user.findFirst({ where: { email } })
     if (userFound)
@@ -19,7 +13,7 @@ export async function register(req, res) {
 
     const passwordHash = await hashPassword(password)
 
-    const defaultRole = roles & roles.length ? roles : ['user']
+    const defaultRole = roles ?? ['user']
 
     const newUser = await prisma.user.create({
       data: {
